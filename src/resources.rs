@@ -4,6 +4,7 @@ use crate::prelude::*;
 pub enum GameState {
     Initial,
     BuildWorld,
+    Run
 }
 
 pub struct CharsetAsset {

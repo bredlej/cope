@@ -1,15 +1,16 @@
 use crate::prelude::*;
+use bevy_inspector_egui::{Inspectable};
 
-#[derive(Component)]
+#[derive(Component, Inspectable)]
 pub struct Actor;
 
-#[derive(Component)]
+#[derive(Component, Inspectable)]
 pub struct Player;
 
-#[derive(Component)]
+#[derive(Component, Inspectable)]
 pub struct NameC(pub String);
 
-#[derive(Component)]
+#[derive(Component, Inspectable)]
 pub struct Position {
     x: i32,
     y: i32

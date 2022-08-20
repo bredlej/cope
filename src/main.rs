@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy::render::texture::ImageSettings;
-use bevy_inspector_egui::WorldInspectorPlugin;
+use bevy_ecs_tilemap::TilemapPlugin;
+use bevy_ecs_tilemap::tiles::TileTexture;
+use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 
 mod components;
 mod world;
@@ -44,11 +46,14 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldPlugin)
         .add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(TilemapPlugin)
         .add_startup_system(initialize)
         .add_state(GameState::Initial)
         .add_system_set(
             SystemSet::on_update(GameState::Initial)
                 .with_system(run)
         )
+        .register_inspectable::<NameC>()
+        .register_inspectable::<components::Position>()
         .run();
 }
