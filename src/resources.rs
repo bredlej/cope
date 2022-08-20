@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[derive(Clone, Eq, PartialEq, Hash, Debug )]
 pub enum GameState {
     Initial,
-    BuildWorld
+    BuildWorld,
 }
 
 pub struct CharsetAsset {

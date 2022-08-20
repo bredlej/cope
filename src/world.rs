@@ -9,29 +9,39 @@ impl Plugin for WorldPlugin {
             .add_system_set(
                 SystemSet::on_enter(GameState::BuildWorld)
                     .label("build_world")
-                    .with_system(initialize));
+                    .with_system(initialize))
+            .add_system_set(
+                SystemSet::on_update(GameState::BuildWorld)
+                    .label("render_world")
+                    .with_system(keyboard_input)
+            );
     }
 }
 
 pub fn initialize(mut commands: Commands, atlas: Res<CharsetAsset>) {
     println!("World plugin initialize");
-    commands.spawn().insert(Actor).insert(NameC("Player".to_string())).insert(Player);
     commands.spawn().insert(Actor).insert(NameC("Bat".to_string()));
     commands.spawn_bundle(SpriteSheetBundle {
         texture_atlas: atlas.atlas.clone(),
         sprite: TextureAtlasSprite {
             color: Color::WHITE,
-            custom_size: Some(Vec2::new(10.0, 10.0)),
             index: 1,
             ..Default::default()
         },
         ..Default::default()
-    });
+    })
+        .insert(Player)
+        .insert(NameC("Player".to_string()));
 }
 
-pub fn list_actors(query: Query<&NameC, With<Actor>>) {
-    /*println!("Actors:");
-    for name in query.iter() {
-        println!(" - {}", name.0);
-    }*/
+pub fn keyboard_input(texture_atlases: Res<Assets<TextureAtlas>>,
+                      keyboard: ResMut<Input<KeyCode>>,
+                      mut q: Query<(&mut TextureAtlasSprite, &Handle<TextureAtlas>, With<Player>)>) {
+    if keyboard.pressed(KeyCode::Space) {
+        for (mut sprite, texture_handle, _player) in q.iter_mut() {
+            let texture_atlas = texture_atlases.get(texture_handle).unwrap();
+            sprite.index = (sprite.index + 1) % texture_atlas.textures.len();
+        }
+    }
+
 }

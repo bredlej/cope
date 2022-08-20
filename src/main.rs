@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::render::texture::ImageSettings;
+use bevy_inspector_egui::WorldInspectorPlugin;
 
 mod components;
 mod world;
@@ -28,8 +29,7 @@ fn initialize(mut commands: Commands,
 }
 
 fn run(mut game_state: ResMut<State<GameState>>) {
-    let current_state = game_state.current().clone();
-    game_state.set(GameState::BuildWorld);
+    game_state.set(GameState::BuildWorld).unwrap();
 }
 
 fn main() {
@@ -43,6 +43,7 @@ fn main() {
         .insert_resource(ClearColor(Color::from([0.0, 0.0, 0.0])))
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldPlugin)
+        .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(initialize)
         .add_state(GameState::Initial)
         .add_system_set(
