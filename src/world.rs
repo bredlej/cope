@@ -18,20 +18,24 @@ impl Plugin for WorldPlugin {
     }
 }
 
-pub fn initialize(mut commands: Commands, atlas: Res<CharsetAsset>) {
-    println!("World plugin initialize");
-    commands.spawn().insert(Actor).insert(NameC("Bat".to_string()));
+fn spawn<> (mut commands: &mut Commands, component: impl Component, name: String, index: usize, atlas: &Res<CharsetAsset>){
     commands.spawn_bundle(SpriteSheetBundle {
         texture_atlas: atlas.atlas.clone(),
         sprite: TextureAtlasSprite {
             color: Color::WHITE,
-            index: 1,
+            index: index,
             ..Default::default()
         },
         ..Default::default()
     })
-        .insert(Player)
-        .insert(NameC("Player".to_string()));
+        .insert(component)
+        .insert(NameC(name));
+}
+
+pub fn initialize(mut commands: Commands, atlas: Res<CharsetAsset>) {
+    println!("World plugin initialize");
+    spawn(&mut commands, Actor, "Bat".to_string(), 2, &atlas);
+    spawn(&mut commands, Player, "Player".to_string(), 2, &atlas);
 }
 
 pub fn keyboard_input(texture_atlases: Res<Assets<TextureAtlas>>,
