@@ -12,7 +12,12 @@ pub struct NameC(pub String);
 
 #[derive(Component, Inspectable)]
 pub struct Position {
-    x: i32,
-    y: i32
+    pub x: i32,
+    pub y: i32,
+}
+
+#[derive(Component)]
+pub struct OccupiedBy {
+    pub entities: Vec<Entity>,
 }
 

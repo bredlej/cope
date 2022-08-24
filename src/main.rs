@@ -27,7 +27,20 @@ fn initialize(mut commands: Commands,
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     commands.insert_resource(CharsetAsset { atlas: texture_atlas_handle.clone() });
     commands.insert_resource(ImageSettings::default_nearest());
-    commands.spawn_bundle(Camera2dBundle::default());
+    let camera_scale = Transform {
+        translation: Default::default(),
+        rotation: Default::default(),
+        scale: Vec3 {
+            x: 0.4,
+            y: 0.4,
+            z: 1.0
+        }
+    };
+    commands.spawn_bundle(Camera2dBundle {
+        transform: camera_scale,
+        ..default()
+    });
+
 }
 
 fn run(mut game_state: ResMut<State<GameState>>) {
