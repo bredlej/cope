@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 use bevy::render::texture::ImageSettings;
 use bevy_ecs_tilemap::TilemapPlugin;
-use bevy_ecs_tilemap::tiles::TileTexture;
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 
-mod components;
-mod world;
-mod resources;
+mod engine;
+mod plugins;
 
 mod prelude {
     pub use bevy::prelude::*;
-    pub use crate::components::*;
+    pub use crate::engine::components::*;
     pub use crate::world::*;
-    pub use crate::resources::*;
+    pub use crate::engine::resources::*;
+    pub use crate::engine::*;
+    pub use crate::plugins::*;
 }
 
 use prelude::*;
@@ -68,5 +68,7 @@ fn main() {
         )
         .register_inspectable::<NameC>()
         .register_inspectable::<components::Position>()
+        .register_inspectable::<components::Glyph>()
+
         .run();
 }
