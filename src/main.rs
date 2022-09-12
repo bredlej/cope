@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use bevy::render::texture::ImageSettings;
 use bevy_ecs_tilemap::TilemapPlugin;
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
-
 mod engine;
 mod plugins;
 
@@ -16,6 +15,7 @@ mod prelude {
 }
 
 use prelude::*;
+use crate::actions::Action;
 
 fn initialize(mut commands: Commands,
               asset_server: Res<AssetServer>,
@@ -26,6 +26,7 @@ fn initialize(mut commands: Commands,
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(8.0, 8.0), 16, 16);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     commands.insert_resource(CharsetAsset { atlas: texture_atlas_handle.clone() });
+    commands.insert_resource(PlayerAction{action: Action::None});
     commands.insert_resource(ImageSettings::default_nearest());
     let camera_scale = Transform {
         translation: Default::default(),

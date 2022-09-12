@@ -3,9 +3,13 @@ use bevy_ecs_tilemap::prelude::{TilemapSize, TileTexture};
 use bevy_ecs_tilemap::TilemapBundle;
 use bevy_ecs_tilemap::tiles::{TileBundle, TileColor, TilePos, TileStorage};
 use itertools::Itertools;
+use crate::actions::{Action};
+use crate::actions::Action::Movement;
+use crate::actions::Direction::{East, North, South, West};
 use crate::bundles::ActorBundle;
 use crate::prelude::*;
 use crate::engine::components::*;
+use crate::GameState::WaitForUserInput;
 
 pub struct WorldPlugin;
 
@@ -35,14 +39,30 @@ impl Plugin for WorldPlugin {
             .add_system_set(
                 SystemSet::on_update(GameState::WaitForUserInput)
                     .label("render")
-                    .with_system(renderer::render)
-            );
+                    .with_system(renderer::render).after(user_input)
+            )
+            .add_system_set(SystemSet::on_update(GameState::ProcessActions)
+                .label("process_actions")
+                .with_system(process_actions))
+            .add_system_set(SystemSet::on_exit(GameState::ProcessActions)
+                .label("post_process")
+                .with_system(post_process));
     }
 }
-fn place_wall_at(commands: &mut Commands, tile_storage: &TileStorage , x: u32, y: u32) {
+
+fn process_actions(commands: Commands, player_actions: Res<PlayerAction>, mut game_state: ResMut<State<GameState>>) {
+    println!("{:?}", player_actions.action);
+    game_state.set(WaitForUserInput);
+}
+
+fn post_process(mut player_actions: ResMut<PlayerAction>) {
+    player_actions.action = Action::None;
+}
+
+fn place_wall_at(commands: &mut Commands, tile_storage: &TileStorage, x: u32, y: u32) {
     commands.entity(tile_storage.get(&TilePos { x, y }).unwrap())
-        .insert(Blocked{})
-        .insert(Wall{});
+        .insert(Blocked {})
+        .insert(Wall {});
 }
 
 pub fn initialize_tiles(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -64,10 +84,11 @@ pub fn initialize_tiles(mut commands: Commands, asset_server: Res<AssetServer>) 
 
     let tile_size = TilemapTileSize { x: 8.0, y: 8.0 };
     let player_entity = commands.spawn().insert_bundle(ActorBundle {
+        actor: Actor,
         name: NameC("Player".to_string()),
         glyph: Glyph('@' as u32),
-        position: Position {x: 1, y: 1}
-    }).insert(Player{}).id();
+        position: Position { x: 1, y: 1 },
+    }).insert(Player {}).id();
 
     commands.entity(tile_storage.get(&TilePos { x: 1, y: 1 }).unwrap()).insert(OccupiedBy { entities: vec!(player_entity) });
 
@@ -124,14 +145,28 @@ pub fn set_tile_occupation(player_query: Query<(Entity, &Player)>,
 }
 
 pub fn user_input(texture_atlases: Res<Assets<TextureAtlas>>,
-                  keyboard: ResMut<Input<KeyCode>>,
+                  mut keyboard: ResMut<Input<KeyCode>>,
+                  mut player_action: ResMut<PlayerAction>,
                   mut q: Query<(&mut TextureAtlasSprite, &Handle<TextureAtlas>, With<Player>)>,
+                  mut game_state: ResMut<State<GameState>>,
 ) {
-    if keyboard.pressed(KeyCode::Space) {
-        for (mut sprite, texture_handle, _player) in q.iter_mut() {
-            let texture_atlas = texture_atlases.get(texture_handle).unwrap();
-            sprite.index = (sprite.index + 1) % texture_atlas.textures.len();
-        }
+    let key = keyboard.get_pressed().next().cloned();
+    let mut action = Action::None;
+    if let Some(key) = key {
+        action = match key {
+            KeyCode::Space => {Action::None},
+            KeyCode::A => { Action::Movement(West)},
+            KeyCode::W => { Action::Movement(North)},
+            KeyCode::S => { Action::Movement(South)},
+            KeyCode::D => { Action::Movement(East)},
+            _ => Action::None
+        };
+        keyboard.reset(key);
+    }
+
+    if action != Action::None {
+        player_action.action = action;
+        game_state.set(GameState::ProcessActions);
     }
 }
 

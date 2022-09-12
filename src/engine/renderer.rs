@@ -1,5 +1,5 @@
 use bevy_ecs_tilemap::prelude::{TileTexture};
-use bevy_ecs_tilemap::tiles::{TileBundle, TileColor, TilePos, TileStorage};
+use bevy_ecs_tilemap::tiles::{TilePos, TileStorage};
 use crate::prelude::*;
 use crate::engine::components::*;
 

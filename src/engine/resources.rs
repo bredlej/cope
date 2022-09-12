@@ -1,10 +1,16 @@
+use crate::actions::Action;
 use crate::prelude::*;
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug )]
 pub enum GameState {
     Initial,
     BuildWorld,
-    WaitForUserInput
+    WaitForUserInput,
+    ProcessActions,
+}
+
+pub struct PlayerAction {
+    pub action: Action,
 }
 
 pub struct CharsetAsset {
