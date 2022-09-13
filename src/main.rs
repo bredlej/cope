@@ -27,6 +27,7 @@ fn initialize(mut commands: Commands,
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
     commands.insert_resource(CharsetAsset { atlas: texture_atlas_handle.clone() });
     commands.insert_resource(PlayerAction{action: Action::None});
+    commands.insert_resource(CurrentInputState(InputState::Single));
     commands.insert_resource(ImageSettings::default_nearest());
     let camera_scale = Transform {
         translation: Default::default(),

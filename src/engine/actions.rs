@@ -6,5 +6,5 @@ pub enum Action {
     None,
     Movement(Direction),
     Attack(Direction),
-    Shout(String)
+    Shoot(Direction)
 }

@@ -7,6 +7,7 @@ use crate::actions::{Action};
 use crate::actions::Action::Movement;
 use crate::actions::Direction::{East, North, South, West};
 use crate::bundles::ActorBundle;
+use crate::DualInputMode::{Attack, Shoot};
 use crate::prelude::*;
 use crate::engine::components::*;
 use crate::GameState::WaitForUserInput;
@@ -144,25 +145,61 @@ pub fn set_tile_occupation(player_query: Query<(Entity, &Player)>,
     game_state.set(GameState::WaitForUserInput).unwrap();
 }
 
-pub fn user_input(texture_atlases: Res<Assets<TextureAtlas>>,
-                  mut keyboard: ResMut<Input<KeyCode>>,
-                  mut player_action: ResMut<PlayerAction>,
-                  mut q: Query<(&mut TextureAtlasSprite, &Handle<TextureAtlas>, With<Player>)>,
-                  mut game_state: ResMut<State<GameState>>,
+pub fn user_input(
+    mut keyboard: ResMut<Input<KeyCode>>,
+    mut player_action: ResMut<PlayerAction>,
+    mut input_state: ResMut<CurrentInputState>,
+    mut game_state: ResMut<State<GameState>>,
 ) {
     let key = keyboard.get_pressed().next().cloned();
     let mut action = Action::None;
-    if let Some(key) = key {
-        action = match key {
-            KeyCode::Space => {Action::None},
-            KeyCode::A => { Action::Movement(West)},
-            KeyCode::W => { Action::Movement(North)},
-            KeyCode::S => { Action::Movement(South)},
-            KeyCode::D => { Action::Movement(East)},
-            _ => Action::None
-        };
-        keyboard.reset(key);
+    match input_state.0 {
+        InputState::Single => {
+            if let Some(key) = key {
+                action = match key {
+                    KeyCode::Space => { Action::None }
+                    KeyCode::A => { Action::Movement(West) }
+                    KeyCode::W => { Action::Movement(North) }
+                    KeyCode::S => { Action::Movement(South) }
+                    KeyCode::D => { Action::Movement(East) }
+                    KeyCode::F => { input_state.0 = InputState::Dual(Attack); Action::None }
+                    KeyCode::G => { input_state.0 = InputState::Dual(Shoot); Action::None }
+                    _ => Action::None
+                };
+                keyboard.reset(key);
+            }
+        }
+        InputState::Dual(DualInputMode::Attack) => {
+            if let Some(key) = key {
+                action = match key {
+                    KeyCode::Space => { Action::None }
+                    KeyCode::A => { Action::Attack(West) }
+                    KeyCode::W => { Action::Attack(North) }
+                    KeyCode::S => { Action::Attack(South) }
+                    KeyCode::D => { Action::Attack(East) }
+                    KeyCode::Escape => {input_state.0 = InputState::Single; Action::None }
+                    _ => {input_state.0 = InputState::Single; Action::None }
+                };
+                keyboard.reset(key);
+            }
+        }
+        InputState::Dual(DualInputMode::Shoot) => {
+            if let Some(key) = key {
+                action = match key {
+                    KeyCode::Space => { Action::None }
+                    KeyCode::A => { Action::Shoot(West) }
+                    KeyCode::W => { Action::Shoot(North) }
+                    KeyCode::S => { Action::Shoot(South) }
+                    KeyCode::D => { Action::Shoot(East) }
+                    KeyCode::Escape => {input_state.0 = InputState::Single; Action::None }
+                    _ => {input_state.0 = InputState::Single; Action::None }
+                };
+                keyboard.reset(key);
+            }
+        }
+        InputState::Target => {}
     }
+
 
     if action != Action::None {
         player_action.action = action;

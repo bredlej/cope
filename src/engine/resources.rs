@@ -9,6 +9,18 @@ pub enum GameState {
     ProcessActions,
 }
 
+pub enum DualInputMode {
+    Attack,
+    Shoot
+}
+pub enum InputState {
+    Single,
+    Dual(DualInputMode),
+    Target
+}
+
+pub struct CurrentInputState(pub InputState);
+
 pub struct PlayerAction {
     pub action: Action,
 }
